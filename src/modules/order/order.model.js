@@ -30,7 +30,8 @@ const orderItemSchema = new mongoose.Schema({
     status: String,
     changedAt: Date,
     note: String
-  }]
+  }],
+  deliveredAt: Date
 });
 
 const orderSchema = new mongoose.Schema({
@@ -104,21 +105,11 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Simple indexes (no problematic middleware)
 orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ userId: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ 'items.vendorId': 1 });
-
-orderSchema.pre('save', async function(next) {
-  if (!this.orderNumber) {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const count = await mongoose.model('Order').countDocuments() + 1;
-    this.orderNumber = `ORD-${year}${month}-${String(count).padStart(6, '0')}`;
-  }
-  next();
-});
 
 module.exports = mongoose.model('Order', orderSchema);

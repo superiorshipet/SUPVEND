@@ -1,8 +1,8 @@
 const catchAsync = require('../../utils/catchAsync.js');
 const orderService = require('./order.service.js');
 const Vendor = require('../vendor/vendor.model.js');
+const AppError = require('../../utils/AppError.js');
 
-// Create order from cart
 const createOrder = catchAsync(async (req, res) => {
   const { paymentMethod, shippingAddress, billingAddress } = req.body;
   
@@ -20,7 +20,6 @@ const createOrder = catchAsync(async (req, res) => {
   });
 });
 
-// Get user orders
 const getUserOrders = catchAsync(async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query;
   
@@ -37,7 +36,6 @@ const getUserOrders = catchAsync(async (req, res) => {
   });
 });
 
-// Get single order
 const getOrder = catchAsync(async (req, res) => {
   const isAdmin = req.user.role === 'admin';
   const order = await orderService.getOrder(
@@ -52,7 +50,6 @@ const getOrder = catchAsync(async (req, res) => {
   });
 });
 
-// Cancel order
 const cancelOrder = catchAsync(async (req, res) => {
   const { reason } = req.body;
   const order = await orderService.cancelOrder(
@@ -68,7 +65,6 @@ const cancelOrder = catchAsync(async (req, res) => {
   });
 });
 
-// Vendor: Get vendor orders
 const getVendorOrders = catchAsync(async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query;
   
@@ -90,7 +86,6 @@ const getVendorOrders = catchAsync(async (req, res) => {
   });
 });
 
-// Vendor: Update order item status
 const updateOrderItemStatus = catchAsync(async (req, res) => {
   const { productId, status, note } = req.body;
   const { orderId } = req.params;
@@ -115,10 +110,10 @@ const updateOrderItemStatus = catchAsync(async (req, res) => {
   });
 });
 
-// Admin: Get all orders
 const getAllOrders = catchAsync(async (req, res) => {
   const { status, page = 1, limit = 20, vendorId } = req.query;
   
+  const Order = require('./order.model.js');
   let filter = {};
   if (status) filter['items.status'] = status;
   if (vendorId) filter['items.vendorId'] = vendorId;
