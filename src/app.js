@@ -71,3 +71,9 @@ const couponRoutes = require('./modules/coupon/coupon.routes.js');
 // Add routes to app
 app.use('/api/v1/cart', cartRoutes);
 app.use('/api/v1/coupons', couponRoutes);
+
+// Import order routes
+const orderRoutes = require('./modules/order/order.routes.js');
+
+// Add routes to app
+app.use('/api/v1/orders', orderRoutes);
