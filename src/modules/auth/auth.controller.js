@@ -68,8 +68,17 @@ const refresh = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-  await authService.logout(req.user.id);
-  
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    try {
+      const { verifyRefreshToken } = require('../../utils/jwt.js');
+      const decoded = verifyRefreshToken(refreshToken);
+      await authService.logout(decoded.id);
+    } catch (e) {
+      // Token invalid/expired — just clear cookies
+    }
+  }
+
   res.clearCookie('refreshToken');
   res.status(200).json({
     status: 'success',
