@@ -63,3 +63,29 @@ const productRoutes = require('./modules/product/product.routes.js');
 // Add routes to app
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/products', productRoutes);
+
+// Import cart and coupon routes
+const cartRoutes = require('./modules/cart/cart.routes.js');
+const couponRoutes = require('./modules/coupon/coupon.routes.js');
+
+// Add routes to app
+app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/coupons', couponRoutes);
+
+// Import order routes
+const orderRoutes = require('./modules/order/order.routes.js');
+
+// Add routes to app
+app.use('/api/v1/orders', orderRoutes);
+
+// Import flash sale routes
+const flashSaleRoutes = require('./modules/flashSale/flashSale.routes.js');
+
+// Add routes to app
+app.use('/api/v1/flash-sales', flashSaleRoutes);
+
+// Import auction routes
+const auctionRoutes = require('./modules/auction/auction.routes.js');
+
+// Add routes to app
+app.use('/api/v1/auctions', auctionRoutes);

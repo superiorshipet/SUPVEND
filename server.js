@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const http = require('http');
 
 // Load environment variables
 dotenv.config({ path: './.env' });
@@ -11,6 +12,13 @@ process.on('uncaughtException', err => {
 });
 
 const app = require('./src/app');
+const { initializeSocket } = require('./src/config/socket.js');
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.io
+initializeSocket(server);
 
 // Database connection
 const DB = process.env.MONGODB_URI || 'mongodb://localhost:27017/supvend';
@@ -21,9 +29,10 @@ mongoose.connect(DB)
 
 // Start server
 const port = process.env.PORT || 5000;
-const server = app.listen(port, () => {
+server.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+  console.log(`🔌 Socket.io ready for real-time connections`);
 });
 
 process.on('unhandledRejection', err => {
