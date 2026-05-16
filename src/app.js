@@ -77,3 +77,9 @@ const orderRoutes = require('./modules/order/order.routes.js');
 
 // Add routes to app
 app.use('/api/v1/orders', orderRoutes);
+
+// Import flash sale routes
+const flashSaleRoutes = require('./modules/flashSale/flashSale.routes.js');
+
+// Add routes to app
+app.use('/api/v1/flash-sales', flashSaleRoutes);

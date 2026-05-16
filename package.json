@@ -17,5 +17,9 @@
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2"
+  },
+  "dependencies": {
+    "bull": "^4.16.5",
+    "ioredis": "^5.10.1"
   }
 }
