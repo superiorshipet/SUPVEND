@@ -55,3 +55,11 @@ app.all('*', (req, res, next) => {
 app.use(errorHandler);
 
 module.exports = app;
+
+// Import new routes
+const categoryRoutes = require('./modules/category/category.routes.js');
+const productRoutes = require('./modules/product/product.routes.js');
+
+// Add routes to app
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/products', productRoutes);
