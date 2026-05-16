@@ -45,13 +45,15 @@ const categorySchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indexes
 categorySchema.index({ name: 1 });
 categorySchema.index({ slug: 1 });
 categorySchema.index({ parentCategory: 1 });
 categorySchema.index({ level: 1 });
 categorySchema.index({ isActive: 1 });
 
-categorySchema.pre('save', function(next) {
+// Pre-save middleware to generate slug
+categorySchema.pre('save', function(doc, next) {
   if (this.isModified('name')) {
     this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   }
