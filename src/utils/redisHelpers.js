@@ -26,7 +26,7 @@ class RedisHelpers {
   async setFlashSale(saleId, data) {
     const key = `flash_sale:${saleId}:data`;
     await redisClient.hset(key, data);
-    await redisClient.expire(key, 3600); // 1 hour expiry after sale ends
+    await redisClient.expire(key, 3600);
   }
   
   // Get flash sale data
@@ -68,6 +68,20 @@ class RedisHelpers {
     await redisClient.del(lockKey);
   }
   
+  // Cache methods
+  async setCache(key, data, ttl = 300) {
+    await redisClient.setex(key, ttl, JSON.stringify(data));
+  }
+  
+  async getCache(key) {
+    const data = await redisClient.get(key);
+    return data ? JSON.parse(data) : null;
+  }
+  
+  async deleteCache(key) {
+    await redisClient.del(key);
+  }
+  
   // Rate limiting for bids
   async checkRateLimit(userId, action, limit = 10, window = 60) {
     const key = `rate_limit:${action}:${userId}`;
@@ -100,24 +114,3 @@ class RedisHelpers {
 }
 
 module.exports = new RedisHelpers();
-
-// Cache methods
-async setCache(key, data, ttl = 300) {
-  await redisClient.setex(key, ttl, JSON.stringify(data));
-}
-
-async getCache(key) {
-  const data = await redisClient.get(key);
-  return data ? JSON.parse(data) : null;
-}
-
-async deleteCache(key) {
-  await redisClient.del(key);
-}
-
-module.exports = {
-  // ... existing exports
-  setCache,
-  getCache,
-  deleteCache
-};

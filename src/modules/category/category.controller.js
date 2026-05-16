@@ -1,28 +1,29 @@
 const catchAsync = require('../../utils/catchAsync.js');
 const Category = require('./category.model.js');
 const AppError = require('../../utils/AppError.js');
-const cloudinary = require('../../config/cloudinary.js');
+
+// Helper function to generate slug
+const generateSlug = (name) => {
+  return name.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+};
 
 // Create category (Admin only)
 const createCategory = catchAsync(async (req, res) => {
   const { name, description, parentCategory } = req.body;
   
-  // Upload icon to Cloudinary
-  let iconUrl = null;
-  if (req.file) {
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'categories',
-      width: 200,
-      height: 200,
-      crop: 'fill'
-    });
-    iconUrl = result.secure_url;
-  }
+  // Auto-generate slug
+  const slug = generateSlug(name);
+  
+  // Use default icon if none provided
+  const icon = req.body.icon || 'https://cdn-icons-png.flaticon.com/512/1042/1042392.png';
   
   const category = await Category.create({
     name,
-    description,
-    icon: iconUrl,
+    slug,
+    description: description || '',
+    icon,
     parentCategory: parentCategory || null,
     level: parentCategory ? 1 : 0
   });
@@ -76,15 +77,9 @@ const updateCategory = catchAsync(async (req, res) => {
     throw new AppError('Category not found', 404);
   }
   
-  // Upload new icon if provided
-  if (req.file) {
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'categories',
-      width: 200,
-      height: 200,
-      crop: 'fill'
-    });
-    req.body.icon = result.secure_url;
+  // Update slug if name changes
+  if (req.body.name) {
+    req.body.slug = generateSlug(req.body.name);
   }
   
   const updatedCategory = await Category.findByIdAndUpdate(
@@ -115,7 +110,7 @@ const deleteCategory = catchAsync(async (req, res) => {
     throw new AppError(`Cannot delete category with ${productCount} products. Reassign or delete products first.`, 400);
   }
   
-  await category.remove();
+  await category.deleteOne();
   
   res.status(204).json({
     status: 'success',
