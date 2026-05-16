@@ -100,3 +100,24 @@ class RedisHelpers {
 }
 
 module.exports = new RedisHelpers();
+
+// Cache methods
+async setCache(key, data, ttl = 300) {
+  await redisClient.setex(key, ttl, JSON.stringify(data));
+}
+
+async getCache(key) {
+  const data = await redisClient.get(key);
+  return data ? JSON.parse(data) : null;
+}
+
+async deleteCache(key) {
+  await redisClient.del(key);
+}
+
+module.exports = {
+  // ... existing exports
+  setCache,
+  getCache,
+  deleteCache
+};

@@ -83,3 +83,9 @@ const flashSaleRoutes = require('./modules/flashSale/flashSale.routes.js');
 
 // Add routes to app
 app.use('/api/v1/flash-sales', flashSaleRoutes);
+
+// Import auction routes
+const auctionRoutes = require('./modules/auction/auction.routes.js');
+
+// Add routes to app
+app.use('/api/v1/auctions', auctionRoutes);
