@@ -13,12 +13,18 @@ const cartItemSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    min: [1, 'Quantity must be at least 1'],
+    min: 1,
     default: 1
   },
-  price: Number,
-  total: Number
-});
+  price: {
+    type: Number,
+    required: true
+  },
+  total: {
+    type: Number,
+    required: true
+  }
+}, { _id: true });
 
 const cartSchema = new mongoose.Schema({
   userId: {
@@ -28,7 +34,10 @@ const cartSchema = new mongoose.Schema({
     unique: true
   },
   items: [cartItemSchema],
-  couponCode: String,
+  couponCode: {
+    type: String,
+    default: null
+  },
   discountAmount: {
     type: Number,
     default: 0
@@ -41,16 +50,14 @@ const cartSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  expiresAt: {
-    type: Date,
-    default: () => new Date(+new Date() + 30*24*60*60*1000),
-    index: { expires: 0 }
+  shippingCost: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 });
 
 cartSchema.index({ userId: 1 });
-cartSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('Cart', cartSchema);

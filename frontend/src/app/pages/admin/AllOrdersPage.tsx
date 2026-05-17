@@ -4,10 +4,10 @@ export default function AllOrdersPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AllOrders</CardTitle>
+        <CardTitle>All Orders</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">View all platform orders</p>
       </CardContent>
     </Card>
   );

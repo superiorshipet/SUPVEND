@@ -7,7 +7,7 @@ export default function ReportsPage() {
         <CardTitle>Reports</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">View platform analytics and reports</p>
       </CardContent>
     </Card>
   );

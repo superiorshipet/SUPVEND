@@ -24,14 +24,9 @@ const verifyRefreshToken = (token) => {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 };
 
-const decodeToken = (token) => {
-  return jwt.decode(token);
-};
-
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,
-  verifyRefreshToken,
-  decodeToken
+  verifyRefreshToken
 };

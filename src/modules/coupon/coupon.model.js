@@ -24,12 +24,18 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  maxDiscount: Number,
+  maxDiscount: {
+    type: Number,
+    default: null
+  },
   startDate: {
     type: Date,
     default: Date.now
   },
-  endDate: Date,
+  endDate: {
+    type: Date,
+    required: true
+  },
   usageLimit: {
     type: Number,
     default: 1
@@ -42,26 +48,10 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
-  applicableVendors: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vendor'
-  }],
-  applicableCategories: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category'
-  }],
-  applicableProducts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
   createdBy: {
     type: String,
     enum: ['admin', 'vendor'],
-    required: true
-  },
-  vendorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vendor'
+    default: 'admin'
   },
   isActive: {
     type: Boolean,
@@ -74,6 +64,5 @@ const couponSchema = new mongoose.Schema({
 couponSchema.index({ code: 1 });
 couponSchema.index({ endDate: 1 });
 couponSchema.index({ isActive: 1 });
-couponSchema.index({ vendorId: 1 });
 
 module.exports = mongoose.model('Coupon', couponSchema);

@@ -4,10 +4,10 @@ export default function AdminDashboard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AdminDashboard</CardTitle>
+        <CardTitle>Admin Dashboard</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">Welcome to Admin Dashboard</p>
       </CardContent>
     </Card>
   );

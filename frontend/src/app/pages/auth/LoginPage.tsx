@@ -11,8 +11,8 @@ export default function LoginPage() {
   const { login } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'test@example.com',
+    password: '123456',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,14 +20,21 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', formData.email);
+      
       const response = await authApi.login({
         email: formData.email,
         password: formData.password
       });
       
+      console.log('Login response:', response.data);
+      
       const { user, accessToken } = response.data.data;
+      
+      // Save to store
       login(user, accessToken);
-      toast.success('Login successful!');
+      
+      toast.success(`Welcome back, ${user.name}!`);
       
       // Redirect based on role
       if (user.role === 'admin') {
@@ -38,7 +45,9 @@ export default function LoginPage() {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      console.error('Login error:', error);
+      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -59,7 +68,7 @@ export default function LoginPage() {
             required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="john@example.com"
+            placeholder="test@example.com"
           />
 
           <Input
@@ -70,16 +79,6 @@ export default function LoginPage() {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             placeholder="••••••••"
           />
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="rounded border-gray-300 text-[#4F46E5]" />
-              <span className="text-sm text-gray-700">Remember me</span>
-            </label>
-            <Link to="/forgot-password" className="text-sm text-[#4F46E5] hover:underline">
-              Forgot password?
-            </Link>
-          </div>
 
           <Button type="submit" loading={loading} className="w-full" size="lg">
             Sign In
@@ -92,6 +91,14 @@ export default function LoginPage() {
             <Link to="/register" className="text-[#4F46E5] hover:underline font-medium">
               Sign up
             </Link>
+          </p>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-xs text-center text-gray-500">
+            Demo credentials:<br />
+            Email: test@example.com<br />
+            Password: 123456
           </p>
         </div>
       </div>

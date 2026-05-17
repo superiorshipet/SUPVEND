@@ -12,12 +12,14 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     fetchWalletData();
-  }, []);
+  }, [retryCount]);
 
   const fetchWalletData = async () => {
+    setLoading(true);
     try {
       const [walletRes, txRes] = await Promise.all([
         walletApi.get(),
@@ -25,9 +27,15 @@ export default function WalletPage() {
       ]);
       setWallet(walletRes.data.data.wallet);
       setTransactions(txRes.data.data.transactions || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching wallet:', error);
-      toast.error('Failed to load wallet data');
+      if (error.response?.status === 429) {
+        toast.error('Too many requests. Please wait a moment.');
+        // Retry after 2 seconds
+        setTimeout(() => setRetryCount(prev => prev + 1), 2000);
+      } else {
+        toast.error('Failed to load wallet data');
+      }
     } finally {
       setLoading(false);
     }
@@ -43,28 +51,17 @@ export default function WalletPage() {
     setDepositing(true);
     try {
       const response = await walletApi.deposit(amount);
-      // In production, redirect to Stripe checkout
-      toast.success('Deposit initiated! Check console for payment intent.');
-      console.log('Payment intent:', response.data.data);
+      toast.success('Deposit initiated!');
       setDepositAmount('');
       fetchWalletData();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Deposit failed');
+      if (error.response?.status === 429) {
+        toast.error('Too many requests. Please wait.');
+      } else {
+        toast.error(error.response?.data?.message || 'Deposit failed');
+      }
     } finally {
       setDepositing(false);
-    }
-  };
-
-  const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case 'deposit':
-        return <TrendingUp className="size-5 text-[#10B981]" />;
-      case 'payment':
-        return <TrendingDown className="size-5 text-[#EF4444]" />;
-      case 'refund':
-        return <RefreshCw className="size-5 text-[#F59E0B]" />;
-      default:
-        return <DollarSign className="size-5 text-gray-500" />;
     }
   };
 
@@ -117,7 +114,9 @@ export default function WalletPage() {
               {transactions.map((tx) => (
                 <div key={tx._id} className="flex justify-between items-center p-3 border-b border-gray-200 last:border-b-0">
                   <div className="flex items-center gap-3">
-                    {getTransactionIcon(tx.type)}
+                    {tx.type === 'deposit' && <TrendingUp className="size-5 text-green-500" />}
+                    {tx.type === 'payment' && <TrendingDown className="size-5 text-red-500" />}
+                    {tx.type === 'refund' && <RefreshCw className="size-5 text-yellow-500" />}
                     <div>
                       <p className="font-medium text-gray-900 capitalize">{tx.type}</p>
                       <p className="text-xs text-gray-500">
@@ -128,8 +127,8 @@ export default function WalletPage() {
                   <div className="text-right">
                     <p className={`font-semibold ${
                       tx.type === 'deposit' || tx.type === 'refund' 
-                        ? 'text-[#10B981]' 
-                        : 'text-[#EF4444]'
+                        ? 'text-green-500' 
+                        : 'text-red-500'
                     }`}>
                       {tx.type === 'deposit' || tx.type === 'refund' ? '+' : '-'}
                       ${Math.abs(tx.amount).toFixed(2)}

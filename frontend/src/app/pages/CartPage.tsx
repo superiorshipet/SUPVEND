@@ -1,46 +1,42 @@
-import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
-import { cartApi, couponsApi } from '../../services/api';
+import { couponsApi } from '../../services/api';
+import { useAuthStore } from '../../store/authStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { toast } from 'sonner';
-import { useState, useEffect } from 'react';
 
 export default function CartPage() {
-  const { items, subtotal, total, discount, updateQuantity, removeItem, clearCart, setCart } = useCartStore();
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { 
+    items, 
+    subtotal, 
+    total, 
+    discount, 
+    loading,
+    fetchCart, 
+    removeItem, 
+    updateQuantity,
+    applyCoupon 
+  } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
   const [couponCode, setCouponCode] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   useEffect(() => {
-    fetchCart();
-  }, []);
-
-  const fetchCart = async () => {
-    try {
-      const response = await cartApi.get();
-      const cart = response.data.data.cart;
-      if (cart.items && cart.items.length > 0) {
-        const cartItems = cart.items.map((item: any) => ({
-          id: item._id,
-          productId: item.productId._id,
-          productName: item.productId.name,
-          productPrice: item.price,
-          productImage: item.productId.images?.[0]?.url || 'https://placehold.co/200',
-          quantity: item.quantity,
-        }));
-        setCart(cartItems);
-      }
-    } catch (error) {
-      console.error('Error fetching cart:', error);
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
     }
-  };
+    fetchCart();
+  }, [isAuthenticated]);
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
+    if (quantity < 1) return;
     try {
-      await cartApi.updateQuantity(itemId, quantity);
-      updateQuantity(itemId, quantity);
+      await updateQuantity(itemId, quantity);
       toast.success('Cart updated');
     } catch (error) {
       toast.error('Failed to update cart');
@@ -49,8 +45,7 @@ export default function CartPage() {
 
   const handleRemoveItem = async (itemId: string) => {
     try {
-      await cartApi.remove(itemId);
-      removeItem(itemId);
+      await removeItem(itemId);
       toast.success('Item removed');
     } catch (error) {
       toast.error('Failed to remove item');
@@ -61,18 +56,33 @@ export default function CartPage() {
     if (!couponCode) return;
     setApplyingCoupon(true);
     try {
-      const response = await couponsApi.validate(couponCode, subtotal);
-      if (response.data.data.valid) {
-        await cartApi.applyCoupon(couponCode);
-        toast.success('Coupon applied!');
-        fetchCart();
+      // First validate the coupon
+      const validateRes = await couponsApi.validate(couponCode, subtotal);
+      if (validateRes.data.data.valid) {
+        await applyCoupon(couponCode);
+        toast.success('Coupon applied successfully!');
+        setCouponCode('');
+      } else {
+        toast.error(validateRes.data.data.message || 'Invalid coupon');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Invalid coupon');
+      toast.error(error.response?.data?.message || 'Failed to apply coupon');
     } finally {
       setApplyingCoupon(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <div className="animate-spin rounded-full size-12 border-b-2 border-[#4F46E5]"></div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -113,13 +123,13 @@ export default function CartPage() {
                   <div className="flex flex-col items-end gap-4">
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="text-[#EF4444] hover:text-[#DC2626]"
+                      className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="size-5" />
                     </button>
                     <div className="flex items-center gap-2 border border-gray-300 rounded-lg">
                       <button
-                        onClick={() => handleUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                         className="p-2 hover:bg-gray-100"
                       >
                         <Minus className="size-4" />
@@ -148,10 +158,10 @@ export default function CartPage() {
                 <Input
                   placeholder="Enter coupon code"
                   value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                 />
                 <Button onClick={handleApplyCoupon} disabled={applyingCoupon} variant="outline">
-                  Apply
+                  {applyingCoupon ? 'Applying...' : 'Apply'}
                 </Button>
               </div>
             </div>
@@ -162,7 +172,7 @@ export default function CartPage() {
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-[#10B981]">
+                <div className="flex justify-between text-green-600">
                   <span>Discount</span>
                   <span>-${discount.toFixed(2)}</span>
                 </div>

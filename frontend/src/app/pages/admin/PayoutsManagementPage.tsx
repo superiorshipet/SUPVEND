@@ -4,10 +4,10 @@ export default function PayoutsManagementPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>PayoutsManagement</CardTitle>
+        <CardTitle>Payouts Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">Manage vendor payouts</p>
       </CardContent>
     </Card>
   );

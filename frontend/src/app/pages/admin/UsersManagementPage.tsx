@@ -4,10 +4,10 @@ export default function UsersManagementPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>UsersManagement</CardTitle>
+        <CardTitle>Users Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">Manage platform users</p>
       </CardContent>
     </Card>
   );

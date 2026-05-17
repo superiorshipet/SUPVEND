@@ -4,10 +4,10 @@ export default function CategoriesManagementPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CategoriesManagement</CardTitle>
+        <CardTitle>Categories Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">Manage product categories</p>
       </CardContent>
     </Card>
   );

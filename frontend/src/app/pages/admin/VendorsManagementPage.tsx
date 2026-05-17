@@ -4,10 +4,10 @@ export default function VendorsManagementPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>VendorsManagement</CardTitle>
+        <CardTitle>Vendors Management</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600">This page is under construction.</p>
+        <p className="text-gray-600">Manage platform vendors</p>
       </CardContent>
     </Card>
   );

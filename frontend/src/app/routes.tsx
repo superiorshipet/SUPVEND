@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import VendorLayout from './layouts/VendorLayout';
@@ -13,13 +14,11 @@ import CheckoutPage from './pages/CheckoutPage';
 import FlashSalesPage from './pages/FlashSalesPage';
 import AuctionsPage from './pages/AuctionsPage';
 import AuctionDetailsPage from './pages/AuctionDetailsPage';
-import VendorProfilePage from './pages/VendorProfilePage';
-
-// Auth Pages
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Customer Dashboard
 import CustomerDashboard from './pages/dashboard/CustomerDashboard';
@@ -41,7 +40,7 @@ import VendorFlashSalesPage from './pages/vendor/VendorFlashSalesPage';
 import VendorAuctionsPage from './pages/vendor/VendorAuctionsPage';
 import PayoutsPage from './pages/vendor/PayoutsPage';
 import CouponsPage from './pages/vendor/CouponsPage';
-import VendorStoreProfilePage from './pages/vendor/VendorProfilePage';
+import VendorProfilePage from './pages/vendor/VendorProfilePage';
 
 // Admin Dashboard
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -54,13 +53,11 @@ import PayoutsManagementPage from './pages/admin/PayoutsManagementPage';
 import AdminCouponsPage from './pages/admin/AdminCouponsPage';
 import ReportsPage from './pages/admin/ReportsPage';
 
-// Error Pages
-import NotFoundPage from './pages/NotFoundPage';
-
 export const router = createBrowserRouter([
+  // Public routes
   {
     path: '/',
-    element: <MainLayout/>,
+    element: <MainLayout />,
     errorElement: <NotFoundPage />,
     children: [
       { index: true, element: <HomePage /> },
@@ -71,16 +68,21 @@ export const router = createBrowserRouter([
       { path: 'flash-sales', element: <FlashSalesPage /> },
       { path: 'auctions', element: <AuctionsPage /> },
       { path: 'auctions/:id', element: <AuctionDetailsPage /> },
-      { path: 'vendors/:id', element: <VendorProfilePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password/:token', element: <ResetPasswordPage /> },
     ],
   },
+  
+  // Customer Dashboard
   {
     path: '/dashboard',
-    element: <DashboardLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['customer', 'vendor', 'admin']}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <CustomerDashboard /> },
       { path: 'profile', element: <ProfilePage /> },
@@ -92,9 +94,15 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <NotificationsPage /> },
     ],
   },
+  
+  // Vendor Dashboard
   {
     path: '/vendor',
-    element: <VendorLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['vendor', 'admin']}>
+        <VendorLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <VendorDashboard /> },
       { path: 'dashboard', element: <VendorDashboard /> },
@@ -106,12 +114,18 @@ export const router = createBrowserRouter([
       { path: 'auctions', element: <VendorAuctionsPage /> },
       { path: 'payouts', element: <PayoutsPage /> },
       { path: 'coupons', element: <CouponsPage /> },
-      { path: 'profile', element: <VendorStoreProfilePage /> },
+      { path: 'profile', element: <VendorProfilePage /> },
     ],
   },
+  
+  // Admin Dashboard
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute allowedRoles={['admin']}>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: 'dashboard', element: <AdminDashboard /> },
