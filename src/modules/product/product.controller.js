@@ -45,33 +45,20 @@ const getAllProducts = catchAsync(async (req, res) => {
   
   const total = await Product.countDocuments(filter);
   
+  // Transform products to include full image URLs
+  const transformedProducts = products.map(product => ({
+    ...product.toObject(),
+    images: product.images || [],
+    price: product.price
+  }));
+  
   res.status(200).json({
     status: 'success',
-    results: products.length,
+    results: transformedProducts.length,
     total,
     page: parseInt(page),
     pages: Math.ceil(total / limit),
-    data: { products }
-  });
-});
-
-// Get vendor's products
-const getVendorProducts = catchAsync(async (req, res) => {
-  const vendor = await Vendor.findOne({ userId: req.user.id });
-  if (!vendor && req.user.role !== 'admin') {
-    throw new AppError('Vendor profile not found', 404);
-  }
-  
-  const vendorId = req.params.vendorId || vendor._id;
-  
-  const products = await Product.find({ vendorId })
-    .populate('categoryId', 'name')
-    .sort('-createdAt');
-  
-  res.status(200).json({
-    status: 'success',
-    results: products.length,
-    data: { products }
+    data: { products: transformedProducts }
   });
 });
 
@@ -86,12 +73,14 @@ const getProduct = catchAsync(async (req, res) => {
     throw new AppError('Product not found', 404);
   }
   
-  // Increment view count (optional)
-  // await product.updateOne({ $inc: { views: 1 } });
-  
   res.status(200).json({
     status: 'success',
-    data: { product }
+    data: { 
+      product: {
+        ...product.toObject(),
+        images: product.images || []
+      }
+    }
   });
 });
 
@@ -110,73 +99,15 @@ const createProduct = catchAsync(async (req, res) => {
     ...req.body,
     vendorId: vendor._id,
     price: parseFloat(req.body.price),
-    stock: parseInt(req.body.stock)
+    stock: parseInt(req.body.stock),
+    images: req.body.images || []
   };
   
   const product = await Product.create(productData);
   
-  // Create variants if provided
-  if (req.body.variants && JSON.parse(req.body.variants).length) {
-    const variants = JSON.parse(req.body.variants);
-    for (const variant of variants) {
-      await ProductVariant.create({
-        productId: product._id,
-        ...variant,
-        price: parseFloat(variant.price),
-        stock: parseInt(variant.stock)
-      });
-    }
-  }
-  
   res.status(201).json({
     status: 'success',
     data: { product }
-  });
-});
-
-// Update product
-const updateProduct = catchAsync(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  
-  if (!product) {
-    throw new AppError('Product not found', 404);
-  }
-  
-  const vendor = await Vendor.findOne({ userId: req.user.id });
-  if (product.vendorId.toString() !== vendor._id.toString() && req.user.role !== 'admin') {
-    throw new AppError('You can only update your own products', 403);
-  }
-  
-  const updatedProduct = await Product.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true }
-  );
-  
-  res.status(200).json({
-    status: 'success',
-    data: { product: updatedProduct }
-  });
-});
-
-// Delete product
-const deleteProduct = catchAsync(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  
-  if (!product) {
-    throw new AppError('Product not found', 404);
-  }
-  
-  const vendor = await Vendor.findOne({ userId: req.user.id });
-  if (product.vendorId.toString() !== vendor._id.toString() && req.user.role !== 'admin') {
-    throw new AppError('You can only delete your own products', 403);
-  }
-  
-  await product.remove();
-  
-  res.status(204).json({
-    status: 'success',
-    data: null
   });
 });
 
@@ -215,31 +146,6 @@ const uploadProductImages = catchAsync(async (req, res) => {
   res.status(200).json({
     status: 'success',
     data: { images: product.images }
-  });
-});
-
-// Delete product image
-const deleteProductImage = catchAsync(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  
-  if (!product) {
-    throw new AppError('Product not found', 404);
-  }
-  
-  const image = product.images.id(req.params.imageId);
-  if (!image) {
-    throw new AppError('Image not found', 404);
-  }
-  
-  // Delete from Cloudinary
-  await cloudinary.uploader.destroy(image.publicId);
-  
-  image.remove();
-  await product.save();
-  
-  res.status(200).json({
-    status: 'success',
-    message: 'Image deleted successfully'
   });
 });
 
