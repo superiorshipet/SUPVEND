@@ -2,12 +2,23 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Copy everything
-COPY . .
+# Copy package files
+COPY package*.json ./
+COPY frontend/package*.json ./frontend/
 
-# Install all dependencies (both backend and frontend)
+# Install ALL backend dependencies (including dotenv)
 RUN npm install
-RUN cd frontend && npm install && npm run build
+
+# Install frontend dependencies
+WORKDIR /app/frontend
+RUN npm install
+
+# Build frontend
+RUN npm run build
+
+# Copy source code
+WORKDIR /app
+COPY . .
 
 EXPOSE 5000
 
