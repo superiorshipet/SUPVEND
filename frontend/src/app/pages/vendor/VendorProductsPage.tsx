@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { productsApi } from '../../../services/api';
 import { Button } from '../../components/ui/Button';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function VendorProductsPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,11 +37,19 @@ export default function VendorProductsPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <div className="animate-spin rounded-full size-12 border-b-2 border-[#4F46E5]"></div>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>My Products</CardTitle>
+          <CardTitle>My Products ({products.length})</CardTitle>
           <Link to="/vendor/products/add">
             <Button size="sm">
               <Plus className="size-4" />
@@ -51,9 +59,7 @@ export default function VendorProductsPage() {
         </div>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 mb-4">No products yet</p>
             <Link to="/vendor/products/add">
@@ -73,7 +79,7 @@ export default function VendorProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {products.map((product: any) => (
+                {products.map((product) => (
                   <tr key={product._id}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -90,8 +96,13 @@ export default function VendorProductsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <Link to={`/vendor/products/${product._id}/edit`}>
+                        <Link to={`/products/${product._id}`}>
                           <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
+                            <Eye className="size-4" />
+                          </button>
+                        </Link>
+                        <Link to={`/vendor/products/${product._id}/edit`}>
+                          <button className="p-1 text-yellow-600 hover:bg-yellow-50 rounded">
                             <Edit className="size-4" />
                           </button>
                         </Link>

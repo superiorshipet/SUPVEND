@@ -37,6 +37,6 @@
     "nodemailer": "^8.0.7",
     "redis": "^5.12.1",
     "socket.io": "^4.8.3",
-    "stripe": "^22.1.1"
+    "stripe": "^22.2.0"
   }
 }

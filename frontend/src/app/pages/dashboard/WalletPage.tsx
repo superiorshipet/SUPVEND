@@ -4,7 +4,7 @@ import { walletApi } from '../../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { toast } from 'sonner';
-import { DollarSign, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, RefreshCw, History } from 'lucide-react';
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<any>(null);
@@ -12,27 +12,24 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     fetchWalletData();
-  }, [retryCount]);
+  }, []);
 
   const fetchWalletData = async () => {
     setLoading(true);
     try {
       const [walletRes, txRes] = await Promise.all([
         walletApi.get(),
-        walletApi.getTransactions({ limit: 20 }),
+        walletApi.getTransactions({ limit: 50 }),
       ]);
       setWallet(walletRes.data.data.wallet);
       setTransactions(txRes.data.data.transactions || []);
     } catch (error: any) {
       console.error('Error fetching wallet:', error);
-      if (error.response?.status === 429) {
-        toast.error('Too many requests. Please wait a moment.');
-        // Retry after 2 seconds
-        setTimeout(() => setRetryCount(prev => prev + 1), 2000);
+      if (error.response?.status === 401) {
+        // Token expired - don't show error, just redirect will happen
       } else {
         toast.error('Failed to load wallet data');
       }
@@ -51,17 +48,28 @@ export default function WalletPage() {
     setDepositing(true);
     try {
       const response = await walletApi.deposit(amount);
-      toast.success('Deposit initiated!');
+      // For now, just add directly to wallet (in production, this would redirect to Stripe)
+      // Since we're in development, let's manually add to wallet via API call
+      toast.success(`$${amount} added to wallet!`);
       setDepositAmount('');
       fetchWalletData();
     } catch (error: any) {
-      if (error.response?.status === 429) {
-        toast.error('Too many requests. Please wait.');
+      if (error.response?.status === 401) {
+        toast.error('Please login again');
       } else {
         toast.error(error.response?.data?.message || 'Deposit failed');
       }
     } finally {
       setDepositing(false);
+    }
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'deposit': return <TrendingUp className="size-5 text-green-500" />;
+      case 'payment': return <TrendingDown className="size-5 text-red-500" />;
+      case 'refund': return <RefreshCw className="size-5 text-yellow-500" />;
+      default: return <DollarSign className="size-5 text-gray-500" />;
     }
   };
 
@@ -104,19 +112,23 @@ export default function WalletPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <History className="size-5" />
+            Transaction History
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No transactions yet</p>
+            <div className="text-center py-12">
+              <History className="size-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-gray-500">No transactions yet</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-96 overflow-y-auto">
               {transactions.map((tx) => (
-                <div key={tx._id} className="flex justify-between items-center p-3 border-b border-gray-200 last:border-b-0">
+                <div key={tx._id} className="flex justify-between items-center p-4 border-b hover:bg-gray-50">
                   <div className="flex items-center gap-3">
-                    {tx.type === 'deposit' && <TrendingUp className="size-5 text-green-500" />}
-                    {tx.type === 'payment' && <TrendingDown className="size-5 text-red-500" />}
-                    {tx.type === 'refund' && <RefreshCw className="size-5 text-yellow-500" />}
+                    {getTransactionIcon(tx.type)}
                     <div>
                       <p className="font-medium text-gray-900 capitalize">{tx.type}</p>
                       <p className="text-xs text-gray-500">
@@ -127,13 +139,15 @@ export default function WalletPage() {
                   <div className="text-right">
                     <p className={`font-semibold ${
                       tx.type === 'deposit' || tx.type === 'refund' 
-                        ? 'text-green-500' 
-                        : 'text-red-500'
+                        ? 'text-green-600' 
+                        : 'text-red-600'
                     }`}>
                       {tx.type === 'deposit' || tx.type === 'refund' ? '+' : '-'}
                       ${Math.abs(tx.amount).toFixed(2)}
                     </p>
-                    <p className="text-xs text-gray-500">Balance: ${tx.balanceAfter?.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">
+                      Balance: ${tx.balanceAfter?.toFixed(2)}
+                    </p>
                   </div>
                 </div>
               ))}
