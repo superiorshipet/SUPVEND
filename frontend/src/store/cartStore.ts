@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { cartApi } from '../services/api';
+import { toast } from 'sonner';
 
 export interface CartItem {
   id: string;
@@ -47,10 +48,10 @@ export const useCartStore = create<CartState>()(
           if (cart.items && cart.items.length > 0) {
             const items = cart.items.map((item: any) => ({
               id: item._id,
-              productId: item.productId._id,
-              productName: item.productId.name,
+              productId: item.productId?._id || item.productId,
+              productName: item.productId?.name || 'Product',
               productPrice: item.price,
-              productImage: item.productId.images?.[0]?.url || 'https://placehold.co/200',
+              productImage: item.productId?.images?.[0]?.url || 'https://placehold.co/200',
               quantity: item.quantity,
             }));
             
@@ -73,14 +74,22 @@ export const useCartStore = create<CartState>()(
 
       addItem: async (product, quantity, variant) => {
         try {
-          await cartApi.add({
-            productId: product.id,
+          // Make sure we have the correct product ID
+          const productId = product._id || product.id;
+          
+          const response = await cartApi.add({
+            productId: productId,
             quantity: quantity,
             variantId: variant?.id
           });
-          await get().fetchCart();
-        } catch (error) {
+          
+          if (response.data.status === 'success') {
+            await get().fetchCart();
+            toast.success(`${product.name} added to cart`);
+          }
+        } catch (error: any) {
           console.error('Error adding to cart:', error);
+          toast.error(error.response?.data?.message || 'Failed to add to cart');
           throw error;
         }
       },
@@ -89,9 +98,10 @@ export const useCartStore = create<CartState>()(
         try {
           await cartApi.remove(itemId);
           await get().fetchCart();
+          toast.success('Item removed');
         } catch (error) {
           console.error('Error removing item:', error);
-          throw error;
+          toast.error('Failed to remove item');
         }
       },
 
@@ -101,7 +111,7 @@ export const useCartStore = create<CartState>()(
           await get().fetchCart();
         } catch (error) {
           console.error('Error updating quantity:', error);
-          throw error;
+          toast.error('Failed to update cart');
         }
       },
 
@@ -109,9 +119,10 @@ export const useCartStore = create<CartState>()(
         try {
           await cartApi.clear();
           await get().fetchCart();
+          toast.success('Cart cleared');
         } catch (error) {
           console.error('Error clearing cart:', error);
-          throw error;
+          toast.error('Failed to clear cart');
         }
       },
 
@@ -119,9 +130,11 @@ export const useCartStore = create<CartState>()(
         try {
           const response = await cartApi.applyCoupon(code);
           await get().fetchCart();
+          toast.success('Coupon applied!');
           return response.data;
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error applying coupon:', error);
+          toast.error(error.response?.data?.message || 'Failed to apply coupon');
           throw error;
         }
       },
