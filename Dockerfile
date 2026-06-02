@@ -1,10 +1,9 @@
-FROM node:20-slim AS builder
+FROM node:20-slim
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
+# Copy all files first
+COPY . .
 
 # Install backend dependencies
 RUN npm install --production
@@ -14,16 +13,8 @@ WORKDIR /app/frontend
 RUN npm install
 RUN npm run build
 
-# Production stage
-FROM node:20-slim
-
+# Go back to app root
 WORKDIR /app
-
-# Copy backend files
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/frontend/dist ./frontend/dist
-COPY . .
 
 EXPOSE 5000
 
