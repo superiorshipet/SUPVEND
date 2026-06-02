@@ -2,19 +2,23 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Copy all files first
-COPY . .
+# Copy package files first (for better caching)
+COPY package*.json ./
+COPY frontend/package*.json ./frontend/
 
-# Install backend dependencies
-RUN npm install --production
+# Install ALL backend dependencies (not just production)
+RUN npm install
 
-# Install frontend dependencies and build
+# Install frontend dependencies
 WORKDIR /app/frontend
 RUN npm install
+
+# Build frontend
 RUN npm run build
 
-# Go back to app root
+# Copy all source files
 WORKDIR /app
+COPY . .
 
 EXPOSE 5000
 
