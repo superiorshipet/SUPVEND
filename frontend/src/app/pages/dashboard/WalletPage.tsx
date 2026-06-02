@@ -4,7 +4,17 @@ import { walletApi } from '../../../services/api';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { toast } from 'sonner';
-import { DollarSign, TrendingUp, TrendingDown, RefreshCw, History } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, RefreshCw, History, CreditCard } from 'lucide-react';
+
+// Only load Stripe if the publishable key exists
+let stripePromise: Promise<any> | null = null;
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+if (stripePublicKey && stripePublicKey !== 'pk_test_...') {
+  import('@stripe/stripe-js').then(({ loadStripe }) => {
+    stripePromise = loadStripe(stripePublicKey);
+  });
+}
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState<any>(null);
@@ -26,19 +36,50 @@ export default function WalletPage() {
       ]);
       setWallet(walletRes.data.data.wallet);
       setTransactions(txRes.data.data.transactions || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching wallet:', error);
-      if (error.response?.status === 401) {
-        // Token expired - don't show error, just redirect will happen
-      } else {
-        toast.error('Failed to load wallet data');
-      }
+      toast.error('Failed to load wallet data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeposit = async () => {
+  const handleStripeDeposit = async () => {
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    if (!stripePromise) {
+      toast.error('Stripe is not configured. Please use Test Deposit instead.');
+      return;
+    }
+
+    setDepositing(true);
+    try {
+      // Create payment intent
+      const response = await walletApi.createDepositIntent({ amount });
+      const { clientSecret } = response.data.data;
+      
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe failed to load');
+      }
+      
+      // In a real implementation, you'd show a payment form here
+      // For now, simulate success
+      toast.info('Stripe payment would open here');
+      console.log('Client secret:', clientSecret);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Deposit failed');
+    } finally {
+      setDepositing(false);
+    }
+  };
+
+  // Simple test deposit (development only)
+  const handleTestDeposit = async () => {
     const amount = parseFloat(depositAmount);
     if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid amount');
@@ -48,17 +89,11 @@ export default function WalletPage() {
     setDepositing(true);
     try {
       const response = await walletApi.deposit(amount);
-      // For now, just add directly to wallet (in production, this would redirect to Stripe)
-      // Since we're in development, let's manually add to wallet via API call
       toast.success(`$${amount} added to wallet!`);
       setDepositAmount('');
       fetchWalletData();
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        toast.error('Please login again');
-      } else {
-        toast.error(error.response?.data?.message || 'Deposit failed');
-      }
+      toast.error(error.response?.data?.message || 'Deposit failed');
     } finally {
       setDepositing(false);
     }
@@ -103,10 +138,14 @@ export default function WalletPage() {
               onChange={(e) => setDepositAmount(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleDeposit} disabled={depositing}>
-              {depositing ? 'Processing...' : 'Add Funds'}
+            <Button onClick={handleTestDeposit} disabled={depositing}>
+              <CreditCard className="size-4" />
+              Add Funds
             </Button>
           </div>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            Funds added directly to wallet for testing
+          </p>
         </CardContent>
       </Card>
 

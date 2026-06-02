@@ -37,6 +37,7 @@ export const authApi = {
   login: (data: any) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
+  changePassword: (data: any) => api.patch('/auth/change-password', data),
 };
 
 // Products API
@@ -87,6 +88,8 @@ export const walletApi = {
   get: () => api.get('/wallet'),
   getTransactions: (params?: any) => api.get('/wallet/transactions', { params }),
   deposit: (amount: number) => api.post('/wallet/deposit', { amount }),
+  createDepositIntent: (data: { amount: number }) => api.post('/wallet/create-deposit-intent', data),
+  confirmDeposit: (data: { paymentIntentId: string; amount: number }) => api.post('/wallet/confirm-deposit', data),
 };
 
 // Flash Sales API
@@ -136,9 +139,5 @@ export const adminApi = {
   approvePayout: (id: string) => api.post(`/admin/dashboard/payouts/${id}/approve`),
   getSalesReport: (params: any) => api.get('/admin/dashboard/reports/sales', { params }),
   updateOrderStatus: (orderId: string, productId: string, status: string, note?: string) =>
-    api.patch(`/orders/vendor/orders/${orderId}/status`, { productId, status, note }),
+    api.patch(`/orders/admin/orders/${orderId}/status`, { productId, status, note }),
 };
-
-// Update adminApi with correct endpoint
-// Remove the previous updateOrderStatus and add this:
-// Already defined above, just ensure it's correct

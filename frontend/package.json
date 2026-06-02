@@ -1,5 +1,5 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "supvend-frontend",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -40,7 +40,7 @@
     "@radix-ui/react-toggle-group": "1.1.2",
     "@radix-ui/react-tooltip": "1.1.8",
     "@tanstack/react-query": "^5.100.10",
-    "axios": "^1.16.1",
+    "axios": "^1.8.4",
     "canvas-confetti": "1.9.4",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -51,9 +51,11 @@
     "lucide-react": "0.487.0",
     "motion": "12.23.24",
     "next-themes": "0.4.6",
+    "react": "18.3.1",
     "react-day-picker": "8.10.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
+    "react-dom": "18.3.1",
     "react-hook-form": "7.55.0",
     "react-popper": "2.3.0",
     "react-resizable-panels": "2.1.7",
@@ -71,28 +73,8 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
-    "@types/react": "18.3.1",
-    "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
-    "typescript": "5.4.5",
     "vite": "6.3.5"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
   }
 }

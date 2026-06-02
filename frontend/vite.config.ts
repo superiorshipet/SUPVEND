@@ -20,8 +20,13 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path,
       },
     },
+    hmr: {
+      overlay: false, // Disable HMR overlay for now
+    },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router', 'axios', 'zustand', 'socket.io-client'],
   },
 })
