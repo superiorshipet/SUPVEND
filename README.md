@@ -1,65 +1,48 @@
-#  SUPVEND - Multi-Vendor Marketplace
+# SUPVEND
 
-A complete production-ready e-commerce platform with multi-vendor support, flash sales, real-time auctions, and wallet system.
+A superior vending system for my project.
 
-## ✨ Features
+## Overview
 
-### 👤 Customer Features
-- 🛍️ Browse products with advanced filtering and search
-- ⚡ Flash sales with countdown timers
-- 🔨 Live auctions with real-time bidding
-- 🛒 Shopping cart with coupon support
-- 💳 Wallet system for seamless payments
-- 📦 Order tracking and history
-- ❤️ Wishlist functionality
-- 🔔 Real-time notifications
+SUPVEND is a JavaScript-based vending system designed to provide an efficient and reliable solution for project needs.
 
-### 🏪 Vendor Features
-- 📊 Dashboard with sales analytics
-- 📦 Product management (CRUD with images)
-- ⚡ Flash sale creation and management
-- 🔨 Auction management
-- 💰 Payout requests
-- 🎫 Coupon management
-- 📈 Sales reports
+## Features
 
-### 👑 Admin Features
-- 👥 User management (ban/unban)
-- 🏪 Vendor approval and management
-- 📦 Product moderation
-- 📂 Category management
-- 💸 Payout approvals
-- 📊 Platform analytics and reports
-- 🎫 Coupon management
+- Efficient vending operations
+- Superior system design
+- JavaScript implementation
 
-## 🛠️ Tech Stack
+## Installation
 
-### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB with Mongoose
-- **Caching:** Redis
-- **Real-time:** Socket.io
-- **Queue:** Bull Queue
-- **Auth:** JWT with refresh tokens
-- **File Upload:** Cloudinary
-- **Payments:** Stripe
-- **Email:** Nodemailer
+```bash
+npm install
+```
 
-### Frontend
-- **Framework:** React 18 with TypeScript
-- **Routing:** React Router 7
-- **Styling:** Tailwind CSS v4
-- **State:** Zustand
-- **Data Fetching:** TanStack Query
-- **Forms:** React Hook Form + Zod
-- **UI Components:** Radix UI primitives
-- **Real-time:** Socket.io-client
+## Usage
 
-## 🚀 Quick Start
+```javascript
+// Add your usage examples here
+```
 
-### Prerequisites
-- Node.js v20+
-- MongoDB
-- Redis
-- npm or pnpm
+## Technologies
+
+- **JavaScript** - Primary language
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Configure your settings
+4. Run the application
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For issues and questions, please open an issue in the repository.
