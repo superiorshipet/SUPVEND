@@ -9,7 +9,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "migrate": "node src/migrations/runner.js migrate",
+    "migrate:rollback": "node src/migrations/runner.js rollback",
+    "migrate:rollback:all": "node src/migrations/runner.js rollback --all",
+    "migrate:fresh": "node src/migrations/runner.js fresh",
+    "migrate:status": "node src/migrations/runner.js status"
   },
   "keywords": [],
   "author": "",
